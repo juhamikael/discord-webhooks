@@ -14,7 +14,7 @@ const getTodayDate = () => {
 };
 
 const app = express();
-app.use(cors({ origin: ["https://dev.juhamikael.info", "localhost:3000"] }));
+app.use(cors({ origin: ["https://dev.juhamikael.info", "http://localhost:3000"] }));
 app.use(bodyParser.json());
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;

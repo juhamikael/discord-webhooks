@@ -1,32 +1,27 @@
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
+import bodyParser from "body-parser";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-
-
-
 const getTodayDate = () => {
-    const now = new Date();
-    const date = now.toLocaleDateString("en-GB");
-    const time = now.toLocaleTimeString("en-GB");
-    return `${date} - ${time}`;
-  };
-  
-
+  const now = new Date();
+  const date = now.toLocaleDateString("en-GB");
+  const time = now.toLocaleTimeString("en-GB");
+  return `${date} - ${time}`;
+};
 
 const app = express();
-app.use(cors({ origin: "https://dev.juhamikael.info" }));
+app.use(cors({ origin: ["https://dev.juhamikael.info", "localhost:3000"] }));
 app.use(bodyParser.json());
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
 
 app.post("/api/send-message", async (req, res) => {
   const { data } = req.body;
-  console.log(data)
+  console.log(data);
   const body = {
     content: `--------------------------
       **Name:** ${data.name}

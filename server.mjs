@@ -3,8 +3,11 @@ import cors from "cors";
 import fetch from "node-fetch";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
+
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
 
 const getTodayDate = () => {
   const now = new Date();
@@ -13,11 +16,23 @@ const getTodayDate = () => {
   return `${date} - ${time}`;
 };
 
-const app = express();
-app.use(cors({ origin: ["https://dev.juhamikael.info", "http://localhost:3000"] }));
-app.use(bodyParser.json());
+const apiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message:
+    "You have exceeded the request limit. Try again in an hour or contact me directly at Discord",
+});
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
+const app = express();
+app.use(
+  cors({ origin: ["https://dev.juhamikael.info", "http://localhost:3000"] })
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/api/send-message", apiLimiter);
+
+
+
 
 app.post("/api/send-message", async (req, res) => {
   const { data } = req.body;
@@ -77,6 +92,7 @@ app.post("/api/send-message", async (req, res) => {
       .json({ message: "An error occurred while sending the message" });
   }
 });
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

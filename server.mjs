@@ -1,13 +1,12 @@
 import express from "express";
+import { Resend } from "resend";
 import cors from "cors";
-import fetch from "node-fetch";
-import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
+const TOKEN = process.env.RESEND_TOKEN;
 
 const getTodayDate = () => {
   const now = new Date();
@@ -25,74 +24,44 @@ const apiLimiter = rateLimit({
 
 const app = express();
 app.use(
-  cors({ origin: ["https://dev.juhamikael.info", "http://localhost:3000"] })
+  cors({
+    origin: [
+      "https://dev.juhamikael.info",
+      // "http://127.0.0.1:3000",
+      // "http://localhost:3000",
+      "https://music.juhamikael.info",
+    ],
+  })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/send-message", apiLimiter);
 
-
-
-
+const resend = new Resend(TOKEN);
 app.post("/api/send-message", async (req, res) => {
   const { data } = req.body;
-  console.log(data);
-  const body = {
-    content: `--------------------------
-      **Name:** ${data.name}
-      **Email:** ${data.email}
-      **Subject:** ${data.subject}
-
-      **Message:**
-      --------------------------
-      ${data.message}
-      `,
-    embeds: [
-      {
-        title: "New Message from https://dev.juhamikael.info",
-        description: getTodayDate(),
-
-        fields: [
-          {
-            name: "Name",
-            value: data.name,
-          },
-          {
-            name: "Email",
-            value: data.email,
-          },
-          {
-            name: "Subject",
-            value: data.subject,
-          },
-        ],
-      },
-    ],
-    attachments: [],
-  };
-
+  const formattedMessage = data.message.replace(/\n/g, '<br />');
   try {
-    const response = await fetch(DISCORD_WEBHOOK, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+    const email = await resend.emails.send({
+      from: "juhamikael.info@mail.juhamikael.info",
+      to: "dev.juhamikael@gmail.com",
+      subject: `${data.subject} / @${data.name} / ${data.email}`,
+      html: `
+      <h1>Message from https://dev.juhamikael.info</h1>
+      <h2>${getTodayDate()}</h2>
+      <hr />
+      <p><strong>Name:</strong> ${data.name}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Subject:</strong> ${data.subject}</p>
+      <p><strong>Message:</strong></p>
+      <p>${formattedMessage}</p>
+      `,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-
-    res.status(200).json({ message: "Message sent!" });
+    res.status(200).json({ email });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while sending the message" });
+    res.status(500).json({ error });
   }
 });
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -68,10 +68,10 @@ app.post("/api/send-message/music", async (req, res) => {
   const formattedMessage = data.message.replace(/\n/g, "<br />");
   try {
     let optionalData = {};
-    if (data.collab) {
+    if (data.collabRequestUrl) {
       optionalData = {
-        collab: data.collab,
-        collabLink: data.collabLink,
+        collab: true,
+        collabLink: data.collabRequestUrl,
       };
     }
     const email = await resend.emails.send({
@@ -79,15 +79,22 @@ app.post("/api/send-message/music", async (req, res) => {
       to: "music.juhamikael@gmail.com",
       subject: `${data.subject} / @${data.name} / ${data.email}`,
       html: `
-      <h1>Message from https://dev.juhamikael.info</h1>
-      <h2>${getTodayDate()}</h2>
-      <hr />
-      <p><strong>Name:</strong> ${data.name}</p>
-      <p><strong>Email:</strong> ${data.email}</p>
-      <p><strong>Subject:</strong> ${data.optionalData}</p>
-      <p><strong>Subject:</strong> ${data.subject}</p>
-      <p><strong>Message:</strong></p>
-      <p>${formattedMessage}</p>
+        <h1>Message from https://music.juhamikael.info</h1>
+        <h2>${getTodayDate()}</h2>
+        <hr />
+        <p><strong>Name:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        ${
+          optionalData && optionalData.collab
+            ? `
+            <p><strong>Collab:</strong> Collab request</p>
+            <p><strong>Collab:</strong> ${optionalData.collabLink}</p>
+            `
+            : ""
+        }
+        <p><strong>Subject:</strong> ${data.subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>${formattedMessage}</p>
       `,
     });
     res.status(200).json({ email });

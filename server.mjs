@@ -78,10 +78,18 @@ app.post("/api/send-message/music", async (req, res) => {
         collab: false,
       };
     }
+
+    let subject;
+    if (optionalData.collab) {
+      subject = `Collab request / ${data.subject} / @${data.name} / ${data.email}`;
+    } else {
+      subject = `${data.subject} / @${data.name} / ${data.email}`;
+    }
+
     const email = await resend.emails.send({
       from: "juhamikael.info@mail.juhamikael.info",
       to: "music.juhamikael@gmail.com",
-      subject: `${data.subject} Collab ${optionalData.collab}/ @${data.name} / ${data.email}`,
+      subject: subject,
       html: `
         <h1>Message from https://music.juhamikael.info</h1>
         <h2>${getTodayDate()}</h2>

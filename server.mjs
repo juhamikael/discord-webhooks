@@ -27,8 +27,8 @@ app.use(
   cors({
     origin: [
       "https://dev.juhamikael.info",
-      // "http://127.0.0.1:3000",
-      // "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:3000",
       "https://music.juhamikael.info",
     ],
   })

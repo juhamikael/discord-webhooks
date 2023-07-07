@@ -38,9 +38,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/send-message", apiLimiter);
 
 const resend = new Resend(TOKEN);
-app.post("/api/send-message", async (req, res) => {
+app.post("/api/send-message/dev", async (req, res) => {
   const { data } = req.body;
-  const formattedMessage = data.message.replace(/\n/g, '<br />');
+  const formattedMessage = data.message.replace(/\n/g, "<br />");
   try {
     const email = await resend.emails.send({
       from: "juhamikael.info@mail.juhamikael.info",
@@ -52,6 +52,39 @@ app.post("/api/send-message", async (req, res) => {
       <hr />
       <p><strong>Name:</strong> ${data.name}</p>
       <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Subject:</strong> ${data.subject}</p>
+      <p><strong>Message:</strong></p>
+      <p>${formattedMessage}</p>
+      `,
+    });
+    res.status(200).json({ email });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+app.post("/api/send-message/music", async (req, res) => {
+  const { data } = req.body;
+  const formattedMessage = data.message.replace(/\n/g, "<br />");
+  try {
+    let optionalData = {};
+    if (data.collab) {
+      optionalData = {
+        collab: data.collab,
+        collabLink: data.collabLink,
+      };
+    }
+    const email = await resend.emails.send({
+      from: "juhamikael.info@mail.juhamikael.info",
+      to: "music.juhamikael@gmail.com",
+      subject: `${data.subject} / @${data.name} / ${data.email}`,
+      html: `
+      <h1>Message from https://dev.juhamikael.info</h1>
+      <h2>${getTodayDate()}</h2>
+      <hr />
+      <p><strong>Name:</strong> ${data.name}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Subject:</strong> ${data.optionalData}</p>
       <p><strong>Subject:</strong> ${data.subject}</p>
       <p><strong>Message:</strong></p>
       <p>${formattedMessage}</p>

@@ -73,11 +73,15 @@ app.post("/api/send-message/music", async (req, res) => {
         collab: true,
         collabLink: data.collabRequestUrl,
       };
+    } else {
+      optionalData = {
+        collab: false,
+      };
     }
     const email = await resend.emails.send({
       from: "juhamikael.info@mail.juhamikael.info",
       to: "music.juhamikael@gmail.com",
-      subject: `${data.subject} / @${data.name} / ${data.email}`,
+      subject: `${data.subject} Collab ${optionalData.collab}/ @${data.name} / ${data.email}`,
       html: `
         <h1>Message from https://music.juhamikael.info</h1>
         <h2>${getTodayDate()}</h2>
@@ -87,7 +91,7 @@ app.post("/api/send-message/music", async (req, res) => {
         ${
           optionalData && optionalData.collab
             ? `
-            <p><strong>Collab:</strong> Collab request</p>
+            <p><strong>Collab request</strong> </p>
             <p><strong>Collab:</strong> ${optionalData.collabLink}</p>
             `
             : ""
